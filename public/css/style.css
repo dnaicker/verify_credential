@@ -1,0 +1,10 @@
+.modal-header {
+	border-bottom: 0px !important;
+}
+.modal-footer {
+	border-top: 0px !important;
+}
+
+.icon-spacing {
+	margin-right: 10px;
+}
