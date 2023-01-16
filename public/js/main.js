@@ -1,4 +1,4 @@
-const ngrok_url = "http://8bc7-105-226-190-7.ngrok.io";
+const ngrok_url = "http://3af9-41-13-122-184.ngrok.io";
 const auth_token = "CiVodHRwczovL3RyaW5zaWMuaWQvc2VjdXJpdHkvdjEvb2Jlcm9uEkkKKnVybjp0cmluc2ljOndhbGxldHM6N1VwRmtIUEdvektWUWNFSHVLYVZ3TSIbdXJuOnRyaW5zaWM6ZWNvc3lzdGVtczpDU0lSGjCTwP0t3e2BdAKnkSjJIJN1HMwlexAmvYBUGBzR_DEFkGZebj-IdHu48JKhMrjBdegiAA"
 let select_template_id = null;
 
@@ -162,12 +162,11 @@ function validate_form() {
 	return true;
 }
 
-
-
 // ------------------------------
 // overlaod function without account_email
 async function send_data_to_server(credential_id, credential_values) {
 	let data = {};
+	let url = `${ngrok_url}/createCredentialSelectiveProofAndVerify`;
 
 	data['auth_token'] = auth_token;
 
@@ -175,26 +174,38 @@ async function send_data_to_server(credential_id, credential_values) {
 	data['credential_id'] = credential_id;
 
 	// { field_name: value, field_name: value, ... }
-	data['credential_selected_fields'] = JSON.stringify(credential_values)
+	data['credential_fields'] = JSON.stringify(credential_values)
+
+	// if input url provided then use that
+	// url = ($("#verifier_url").val() != '') ? $("#verifier_url").val() : url; 
 
 	// generate selection credential proof
 	$.ajax({
 		dataType: 'json',
 		data: data,
-		url: `${ngrok_url}/createCredentialSelectiveProof`,
+		url: url,
 		type: "POST",
 		success: function (result) {
+			console.log('selective proof', result);
 
-			show_save_modal('Credential Save', build_credential_save_modal(credential_values, result), credential_values);
+			// loop through results
+			let arr_format = []; 
+			
+			for (const results in result.validationResults) {
+				let json_obj = result.validationResults[results];
 
-		// verify credential proof
+				// loop through json fields
+				for (const field in json_obj) {
+					console.log(field, json_obj[field]);
+					if(field == 'isValid') {
+						const statusValid = (json_obj[field] == true) ? '<i class="fa-sharp fa-solid fa-circle-check" style="color: #9FC131"></i>' : '<i class="fa-solid fa-circle-exclamation"></i>';
+						arr_format.push('<p>' + results + ' ' + field + ' ' +  statusValid  + '</p>');
+					}
+				}
 
+			};
 
-
-
-			// const display_result = loop_through_data(JSON.parse(result.documentJson), []);
-
-			// show_modal('Credential was created successfully!', '<p><b>Credential Document:</b> <p> ' + result.documentJson + '<p></p>');
+			show_modal('Credential verified successfully!', '<p><b>Verification Proof:</b> <p> ' + arr_format.join('') + '<p></p>');
 		},
 		error: function (result) {
 			show_modal('Error', 'Server could not complete request.');
@@ -202,7 +213,26 @@ async function send_data_to_server(credential_id, credential_values) {
 	});
 }
 
-// ==============================
+// ------------------------------
+function show_save_modal(header, body, data) {
+	$("#save_modal_header")[0].innerHTML = header;
+	$("#save_modal_body")[0].innerHTML = "<p>" + body + "</p>";
+	$("#save_modal").modal('show');
+
+	// attach button event handlers after 
+	$("#send_email").on("click", function (e, target, value) {
+		console.log('send email')
+		// send to server
+		send_data_to_server_email($("#account_email").val(), select_template_id, data);
+	});
+
+	// event handler for copy button
+	var clipboard = new ClipboardJS('#copy_btn');
+	clipboard.on('success', function (e) {
+		navigator.clipboard.writeText(e.text);
+		alert('copied');
+	})
+}
 
 // ------------------------------
 function loop_through_data(data, arr) {
