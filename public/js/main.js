@@ -1,4 +1,4 @@
-const ngrok_url = "http://3af9-41-13-122-184.ngrok.io";
+const ngrok_url = "http://37b5-105-224-60-90.ngrok.io";
 const auth_token = "CiVodHRwczovL3RyaW5zaWMuaWQvc2VjdXJpdHkvdjEvb2Jlcm9uEkkKKnVybjp0cmluc2ljOndhbGxldHM6N1VwRmtIUEdvektWUWNFSHVLYVZ3TSIbdXJuOnRyaW5zaWM6ZWNvc3lzdGVtczpDU0lSGjCTwP0t3e2BdAKnkSjJIJN1HMwlexAmvYBUGBzR_DEFkGZebj-IdHu48JKhMrjBdegiAA"
 let select_template_id = null;
 
@@ -298,12 +298,14 @@ function build_credential_save_modal(data, credential_json) {
 
 // ------------------------------
 function build_select_field_type(data) {
+	console.log(data);
+
 	let arr = [];
 	arr.push("<div>");
 	arr.push("<label class='form-label'>Select Credential</label>");
 	arr.push("<select id='select_template_id' class='form-select template-field form-control' name='type' required data-live-search='true'>");
 	for (let i = 0; i < data.length; i++) {
-		arr.push("<option value='" + data[i].id + "'>" + data[i].id + "</option>");
+		arr.push("<option value='" + data[i].id + "'>" + (data[i].data.type ? data[i].id + " - " + data[i].data.type[1] : data[i].id) + "</option>");
 	}
 	arr.push("</select>");
 	arr.push("</div>");
